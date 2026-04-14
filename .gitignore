@@ -1,0 +1,27 @@
+# Godot 4 — arquivos temporários e cache
+.godot/
+
+# Builds exportadas
+builds/
+export/
+
+# Arquivos de importação gerados automaticamente
+*.import
+
+# Configurações locais do editor (específicas por máquina)
+*.translation
+.env
+
+# Mono / C# (se usar no futuro)
+.mono/
+data_*/
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
