@@ -18,6 +18,9 @@ var _morto: bool = false
 # Guarda a última direção para orientar a hitbox
 var last_direction: Vector2 = Vector2.RIGHT
 
+# Velocidade do knockback ao tomar dano
+var _knockback: Vector2 = Vector2.ZERO
+
 # Controle de multi-hit por ataque
 var _inimigos_atingidos: Array = []
 
@@ -36,17 +39,24 @@ func _ready() -> void:
 	current_hp = max_hp
 	attack_hitbox.monitoring = false
 	attack_hitbox.body_entered.connect(_on_hitbox_body_entered)
+	# Adiciona ao grupo para que inimigos possam encontrar o player
+	add_to_group("player")
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	var _delta := delta
 	# Para todo movimento ao morrer
 	if _morto:
 		velocity = Vector2.ZERO
 		return
 
+	# Aplica knockback e amorece a cada frame
+	if _knockback != Vector2.ZERO:
+		_knockback = _knockback.move_toward(Vector2.ZERO, 400.0 * _delta)
+
 	var direction: Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if direction != Vector2.ZERO:
 		last_direction = direction
-	velocity = direction * move_speed
+	velocity = direction * move_speed + _knockback
 	move_and_slide()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -69,13 +79,17 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	if body.has_method("receber_dano"):
 		body.receber_dano(DANO_ATAQUE)
 
-# Chamado pelo inimigo ao encostar no player
-func receber_dano_contato(quantidade: int) -> void:
+# Chamado pelo inimigo ao encostar no player; origem é a posição do inimigo
+func receber_dano_contato(quantidade: int, origem: Vector2 = Vector2.ZERO) -> void:
 	if _morto or _invulneravel:
 		return
 
 	current_hp -= quantidade
 	print("Kael recebeu %d de dano — HP: %d/%d" % [quantidade, current_hp, max_hp])
+
+	# Knockback: empurra Kael para longe do inimigo
+	var direcao_knockback := (global_position - origem).normalized()
+	_knockback = direcao_knockback * 220.0
 
 	_spawnar_sangue()
 	_piscar()
@@ -125,3 +139,6 @@ func _morrer() -> void:
 	for i in range(3):
 		_spawnar_sangue()
 	print("Kael morreu!")
+	# Recarrega a cena após 1.5 segundos
+	await get_tree().create_timer(1.5).timeout
+	get_tree().reload_current_scene()
