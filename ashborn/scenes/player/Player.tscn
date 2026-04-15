@@ -1,23 +1,37 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bqp83ug3gdk45"]
 
-[ext_resource type="Script" path="res://ashborn/scripts/player/Player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://vcgby1bknx2m" path="res://ashborn/scripts/player/Player.gd" id="1_player"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(32, 32)
 
-[node name="Player" type="CharacterBody2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
+size = Vector2(24, 24)
+
+[node name="Player" type="CharacterBody2D" unique_id=499603343]
+collision_layer = 2
+collision_mask = 1
+platform_wall_layers = 1
 script = ExtResource("1_player")
 
-[node name="Visual" type="ColorRect" parent="."]
+[node name="Visual" type="ColorRect" parent="." unique_id=1133846660]
 offset_left = -16.0
 offset_top = -16.0
 offset_right = 16.0
 offset_bottom = 16.0
 color = Color(0.2, 0.6, 1, 1)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=707807641]
 shape = SubResource("RectangleShape2D_player")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=559792704]
 position_smoothing_enabled = true
-position_smoothing_speed = 5.0
+
+[node name="AttackHitbox" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 4
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox"]
+shape = SubResource("RectangleShape2D_hitbox")
