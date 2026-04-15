@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+# Emitido sempre que o HP muda — o HUD escuta este sinal
+signal hp_changed(atual: int, maximo: int)
+
 # --- Stats do Kael ---
 var move_speed: float = 150.0
 var max_hp: int = 100
@@ -41,6 +44,8 @@ func _ready() -> void:
 	attack_hitbox.body_entered.connect(_on_hitbox_body_entered)
 	# Adiciona ao grupo para que inimigos possam encontrar o player
 	add_to_group("player")
+	# Emite o HP inicial para o HUD exibir corretamente desde o começo
+	hp_changed.emit(current_hp, max_hp)
 
 func _physics_process(delta: float) -> void:
 	var _delta := delta
@@ -90,6 +95,9 @@ func receber_dano_contato(quantidade: int, origem: Vector2 = Vector2.ZERO) -> vo
 	# Knockback: empurra Kael para longe do inimigo
 	var direcao_knockback := (global_position - origem).normalized()
 	_knockback = direcao_knockback * 220.0
+
+	# Notifica o HUD com o novo valor de HP
+	hp_changed.emit(current_hp, max_hp)
 
 	_spawnar_sangue()
 	_piscar()
