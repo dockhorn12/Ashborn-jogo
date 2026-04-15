@@ -115,5 +115,5 @@ color = Color(0.45, 0.45, 0.52, 1)
 [node name="Player" parent="." unique_id=890174828 instance=ExtResource("1_world")]
 position = Vector2(320, 240)
 
-[node name="Enemy" parent="." instance=ExtResource("2_world")]
+[node name="Enemy" parent="." unique_id=1454674308 instance=ExtResource("2_world")]
 position = Vector2(420, 200)
