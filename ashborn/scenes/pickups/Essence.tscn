@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ashborn/scripts/pickups/Essence.gd" id="1_essence"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_essence"]
+size = Vector2(16, 16)
+
+[node name="Essence" type="Area2D"]
+collision_layer = 6
+collision_mask = 2
+script = ExtResource("1_essence")
+
+[node name="Visual" type="ColorRect" parent="."]
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+color = Color(0.7, 0.3, 1.0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_essence")

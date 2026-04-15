@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+# Cena da essência que será dropada ao morrer
+const ESSENCIA_CENA := preload("res://ashborn/scenes/pickups/Essence.tscn")
+
 # --- Identificação ---
 @export var enemy_name: String = "Inimigo"
 
@@ -57,4 +60,11 @@ func _piscar() -> void:
 
 func _morrer() -> void:
 	print(enemy_name + " morreu!")
+	_dropar_essencia()
 	queue_free()
+
+func _dropar_essencia() -> void:
+	# Instancia a essência na posição do inimigo e adiciona à cena pai
+	var essencia := ESSENCIA_CENA.instantiate()
+	essencia.global_position = global_position
+	get_parent().add_child(essencia)
