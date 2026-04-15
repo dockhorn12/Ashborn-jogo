@@ -5,8 +5,14 @@ var move_speed: float = 150.0
 var max_hp: int = 100
 var current_hp: int = 100
 
+# Dano causado por cada ataque
+const DANO_ATAQUE: int = 10
+
 # Guarda a última direção do movimento para orientar a hitbox de ataque
 var last_direction: Vector2 = Vector2.RIGHT
+
+# Controle de multi-hit: guarda os inimigos já atingidos neste ataque
+var _inimigos_atingidos: Array = []
 
 @onready var attack_hitbox: Area2D = $AttackHitbox
 
@@ -31,11 +37,14 @@ func _physics_process(_delta: float) -> void:
 	move_and_slide()
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Detecta o botão de ataque (tecla J)
+	# Detecta o botão de ataque (tecla F)
 	if event.is_action_pressed("attack"):
 		_executar_ataque()
 
 func _executar_ataque() -> void:
+	# Limpa a lista de inimigos atingidos do ataque anterior
+	_inimigos_atingidos.clear()
+
 	# Posiciona a hitbox 36px na frente do player (direção que ele está olhando)
 	attack_hitbox.position = last_direction.normalized() * 36.0
 
@@ -45,6 +54,13 @@ func _executar_ataque() -> void:
 	attack_hitbox.monitoring = false
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	# Se o corpo atingido tiver o método receber_dano, chama ele
+	# Ignora se esse inimigo já foi atingido neste ataque (evita multi-hit)
+	if body in _inimigos_atingidos:
+		return
+
+	# Registra o inimigo como atingido neste ataque
+	_inimigos_atingidos.append(body)
+
+	# Chama receber_dano passando o valor de dano do Kael
 	if body.has_method("receber_dano"):
-		body.receber_dano()
+		body.receber_dano(DANO_ATAQUE)
