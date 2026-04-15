@@ -4,6 +4,7 @@ extends CanvasLayer
 @onready var barra_fill: ColorRect    = $Control/BarraHP/Fill
 @onready var label_hp: Label          = $Control/LabelHP
 @onready var label_essencia: Label    = $Control/LabelEssencia
+@onready var label_flechas: Label     = $Control/LabelFlechas
 @onready var label_inimigos: Label    = $Control/LabelInimigos
 
 # Largura máxima da barra (em pixels)
@@ -18,6 +19,9 @@ func atualizar_hp(atual: int, maximo: int) -> void:
 # Atualiza o total de essência coletada
 func atualizar_essencia(total: int) -> void:
 	label_essencia.text = "Essência: %d" % total
+
+func atualizar_flechas(total: int) -> void:
+	label_flechas.text = "Flechas: %d" % total
 
 # Atualiza o contador de inimigos vivos
 func atualizar_inimigos(quantidade: int) -> void:

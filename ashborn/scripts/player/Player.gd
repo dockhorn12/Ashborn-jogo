@@ -1,61 +1,40 @@
 extends CharacterBody2D
 
-# Emitido sempre que o HP muda — o HUD escuta este sinal
 signal hp_changed(atual: int, maximo: int)
-
-# Emitido ao coletar essência
 signal essencia_changed(total: int)
-
-# Emitido ao tomar dano — a câmera escuta para fazer screen shake
+signal flechas_changed(total: int)
 signal tomou_dano
 
-# --- Stats do Kael ---
+# --- Stats ---
 var move_speed: float = 160.0
 var max_hp: int = 100
 var current_hp: int = 100
-
-# Total de essência coletada
 var essencia: int = 0
+var flechas: int = 10
+var _cura_acumulada: float = 0.0
 
-# Dano do ataque corpo a corpo
 const DANO_ATAQUE: int = 15
-
-# Custo de essência para usar a skill Q
-const CUSTO_SKILL: int = 10
-
-# Tempo de invulnerabilidade após receber dano (segundos)
 const TEMPO_INVULNERAVEL: float = 0.5
-
-# Cooldown do dash em segundos
 const COOLDOWN_DASH: float = 0.8
 
-# Controle de estado
+# --- Estado ---
 var _invulneravel: bool = false
 var _morto: bool = false
 var _dash_pronto: bool = true
-
-# Direção atual do mouse em relação ao player
 var _direcao_mouse: Vector2 = Vector2.RIGHT
-
-# Velocidade do knockback ao tomar dano
 var _knockback: Vector2 = Vector2.ZERO
-
-# Controle de multi-hit por ataque
 var _inimigos_atingidos: Array = []
 
-# Cena do projétil da skill Q
 const PROJECTILE_CENA := preload("res://ashborn/scenes/combat/Projectile.tscn")
 
-# --- Referências ---
 @onready var attack_hitbox: Area2D = $AttackHitbox
 @onready var visual: ColorRect = $Visual
 @onready var camera: Camera2D = $Camera2D
 
-# Cores
-const COR_NORMAL     := Color(0.35, 0.75, 1.0, 1)
-const COR_DANO       := Color(1.0, 1.0, 1.0, 1)
-const COR_MORTO      := Color(0.25, 0.25, 0.25, 1)
-const COR_SANGUE     := Color(0.75, 0.0, 0.05, 1)
+const COR_NORMAL := Color(0.35, 0.75, 1.0, 1)
+const COR_DANO   := Color(1.0, 1.0, 1.0, 1)
+const COR_MORTO  := Color(0.25, 0.25, 0.25, 1)
+const COR_SANGUE := Color(0.75, 0.0, 0.05, 1)
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
@@ -65,16 +44,17 @@ func _ready() -> void:
 	add_to_group("player")
 	hp_changed.emit(current_hp, max_hp)
 	essencia_changed.emit(essencia)
+	flechas_changed.emit(flechas)
+	# Luz dinâmica azul no player
+	_criar_luz()
 
 func _physics_process(delta: float) -> void:
 	if _morto:
 		velocity = Vector2.ZERO
 		return
 
-	# Atualiza direção para o mouse a cada frame
 	_direcao_mouse = (get_global_mouse_position() - global_position).normalized()
 
-	# Aplica knockback e amorece gradualmente
 	if _knockback != Vector2.ZERO:
 		_knockback = _knockback.move_toward(Vector2.ZERO, 500.0 * delta)
 
@@ -88,7 +68,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("attack"):
 		_executar_ataque()
 	if event.is_action_pressed("skill_q"):
-		_executar_skill_q()
+		_disparar_flecha()
 	if event.is_action_pressed("dash"):
 		_executar_dash()
 
@@ -100,20 +80,20 @@ func _executar_ataque() -> void:
 	await get_tree().create_timer(0.12).timeout
 	attack_hitbox.monitoring = false
 
-# Skill Q — dispara projétil na direção do mouse (custa 10 de essência)
-func _executar_skill_q() -> void:
-	if essencia < CUSTO_SKILL:
-		print("Essência insuficiente para usar skill!")
+# Dispara uma flecha na direção do mouse (custa 1 flecha)
+func _disparar_flecha() -> void:
+	if flechas <= 0:
+		print("Sem flechas!")
 		return
-	essencia -= CUSTO_SKILL
-	essencia_changed.emit(essencia)
+	flechas -= 1
+	flechas_changed.emit(flechas)
 
 	var proj := PROJECTILE_CENA.instantiate()
 	proj.direcao = _direcao_mouse
 	proj.global_position = global_position + _direcao_mouse * 20.0
 	get_parent().add_child(proj)
 
-# Dash rápido na direção do movimento (ou do mouse se parado)
+# Dash rápido
 func _executar_dash() -> void:
 	if not _dash_pronto or _morto:
 		return
@@ -121,21 +101,36 @@ func _executar_dash() -> void:
 	var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if dir == Vector2.ZERO:
 		dir = _direcao_mouse
-	# Aplica impulso forte brevemente
 	_knockback = dir * 420.0
-	# Fica semi-transparente durante o dash
 	visual.modulate = Color(1, 1, 1, 0.4)
 	await get_tree().create_timer(0.15).timeout
 	visual.modulate = Color(1, 1, 1, 1.0)
-	# Aguarda cooldown antes de liberar novo dash
 	await get_tree().create_timer(COOLDOWN_DASH).timeout
 	if is_instance_valid(self):
 		_dash_pronto = true
 
-# Chamado pela Essence ao ser coletada
+# Coleta essência
 func coletar_essencia() -> void:
 	essencia += 1
 	essencia_changed.emit(essencia)
+
+# Recebe flechas de pickup
+func receber_flecha(quantidade: int) -> void:
+	flechas += quantidade
+	flechas_changed.emit(flechas)
+	print("Flechas: %d" % flechas)
+
+# Cura o player (usado pelo altar e poção)
+func curar(quantidade: float) -> void:
+	if _morto or current_hp >= max_hp:
+		return
+	# Acumula frações de HP — sem isso, curas pequenas (por frame) somem 0
+	_cura_acumulada += quantidade
+	if _cura_acumulada >= 1.0:
+		var cura_int := int(_cura_acumulada)
+		_cura_acumulada -= cura_int
+		current_hp = mini(current_hp + cura_int, max_hp)
+		hp_changed.emit(current_hp, max_hp)
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
 	if body in _inimigos_atingidos:
@@ -144,7 +139,6 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	if body.has_method("receber_dano"):
 		body.receber_dano(DANO_ATAQUE)
 
-# Chamado pelo inimigo ao encostar no player
 func receber_dano_contato(quantidade: int, origem: Vector2 = Vector2.ZERO) -> void:
 	if _morto or _invulneravel:
 		return
@@ -199,3 +193,19 @@ func _morrer() -> void:
 	print("Kael morreu!")
 	await get_tree().create_timer(1.5).timeout
 	get_tree().reload_current_scene()
+
+# Luz dinâmica azul gerada por código
+func _criar_luz() -> void:
+	var luz := PointLight2D.new()
+	luz.energy = 0.9
+	luz.texture_scale = 1.8
+	luz.color = Color(0.3, 0.6, 1.0, 1)
+	var grad := Gradient.new()
+	grad.colors = PackedColorArray([Color.WHITE, Color(1, 1, 1, 0)])
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.width = 128
+	tex.height = 128
+	luz.texture = tex
+	add_child(luz)

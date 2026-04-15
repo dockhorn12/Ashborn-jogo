@@ -18,6 +18,7 @@ var _inimigos_vivos: int = 0
 func _ready() -> void:
 	player.hp_changed.connect(hud.atualizar_hp)
 	player.essencia_changed.connect(hud.atualizar_essencia)
+	player.flechas_changed.connect(hud.atualizar_flechas)
 	player.tomou_dano.connect(_screen_shake)
 
 	for inimigo in get_tree().get_nodes_in_group("enemies"):

@@ -1,10 +1,10 @@
 extends Area2D
 
 # Velocidade de deslocamento do projétil
-const VELOCIDADE: float = 400.0
+const VELOCIDADE: float = 520.0
 
 # Dano causado ao acertar um inimigo
-const DANO: int = 25
+const DANO: int = 20
 
 # Tempo de vida máximo em segundos (some se não acertar nada)
 const TEMPO_VIDA: float = 1.5

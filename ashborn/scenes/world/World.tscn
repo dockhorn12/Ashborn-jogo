@@ -3,7 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://bqp83ug3gdk45" path="res://ashborn/scenes/player/Player.tscn" id="1_world"]
 [ext_resource type="PackedScene" path="res://ashborn/scenes/enemies/Enemy.tscn" id="2_world"]
 [ext_resource type="PackedScene" path="res://ashborn/scenes/hud/HUD.tscn" id="3_world"]
-[ext_resource type="Script" path="res://ashborn/scripts/world/World.gd" id="4_world"]
+[ext_resource type="Script" uid="uid://dmh3clfdsa8cw" path="res://ashborn/scripts/world/World.gd" id="4_world"]
+[ext_resource type="PackedScene" path="res://ashborn/scenes/world/Altar.tscn" id="5_world"]
 
 [sub_resource type="RectangleShape2D" id="Shape_top"]
 size = Vector2(640, 32)
@@ -115,23 +116,22 @@ offset_right = 16.0
 offset_bottom = 80.0
 color = Color(0.22, 0.18, 0.3, 1)
 
-[node name="HUD" parent="." instance=ExtResource("3_world")]
+[node name="HUD" parent="." unique_id=107337578 instance=ExtResource("3_world")]
+
+[node name="Altar" parent="." unique_id=123932764 instance=ExtResource("5_world")]
+position = Vector2(80, 80)
 
 [node name="Player" parent="." unique_id=890174828 instance=ExtResource("1_world")]
 position = Vector2(320, 240)
 
 [node name="Enemy" parent="." unique_id=1454674308 instance=ExtResource("2_world")]
 position = Vector2(420, 200)
-groups = ["enemies"]
 
-[node name="Enemy2" parent="." instance=ExtResource("2_world")]
+[node name="Enemy2" parent="." unique_id=259959427 instance=ExtResource("2_world")]
 position = Vector2(150, 150)
-groups = ["enemies"]
 
-[node name="Enemy3" parent="." instance=ExtResource("2_world")]
+[node name="Enemy3" parent="." unique_id=1359191563 instance=ExtResource("2_world")]
 position = Vector2(500, 380)
-groups = ["enemies"]
 
-[node name="Enemy4" parent="." instance=ExtResource("2_world")]
+[node name="Enemy4" parent="." unique_id=1078327554 instance=ExtResource("2_world")]
 position = Vector2(200, 380)
-groups = ["enemies"]
