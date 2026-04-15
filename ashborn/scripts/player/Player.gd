@@ -3,10 +3,16 @@ extends CharacterBody2D
 # Emitido sempre que o HP muda — o HUD escuta este sinal
 signal hp_changed(atual: int, maximo: int)
 
+# Emitido ao coletar essência
+signal essencia_changed(total: int)
+
 # --- Stats do Kael ---
 var move_speed: float = 150.0
 var max_hp: int = 100
 var current_hp: int = 100
+
+# Total de essência coletada
+var essencia: int = 0
 
 # Dano causado por cada ataque
 const DANO_ATAQUE: int = 10
@@ -44,8 +50,9 @@ func _ready() -> void:
 	attack_hitbox.body_entered.connect(_on_hitbox_body_entered)
 	# Adiciona ao grupo para que inimigos possam encontrar o player
 	add_to_group("player")
-	# Emite o HP inicial para o HUD exibir corretamente desde o começo
+	# Emite valores iniciais para o HUD exibir corretamente desde o começo
 	hp_changed.emit(current_hp, max_hp)
+	essencia_changed.emit(essencia)
 
 func _physics_process(delta: float) -> void:
 	var _delta := delta
@@ -76,6 +83,11 @@ func _executar_ataque() -> void:
 	attack_hitbox.monitoring = true
 	await get_tree().create_timer(0.15).timeout
 	attack_hitbox.monitoring = false
+
+# Chamado pela Essence ao ser coletada
+func coletar_essencia() -> void:
+	essencia += 1
+	essencia_changed.emit(essencia)
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
 	if body in _inimigos_atingidos:

@@ -11,9 +11,9 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	# Só coleta se for o player
-	if not body.has_method("receber_dano_contato"):
+	if not body.has_method("coletar_essencia"):
 		return
-	print("Essência coletada!")
+	body.coletar_essencia()
 	_animar_coleta()
 
 func _animar_surgimento() -> void:

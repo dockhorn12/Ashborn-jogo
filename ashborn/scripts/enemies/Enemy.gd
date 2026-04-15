@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+# Emitido antes de morrer — a World escuta para atualizar o contador
+signal morreu
+
 # Cena da essência que será dropada ao morrer
 const ESSENCIA_CENA := preload("res://ashborn/scenes/pickups/Essence.tscn")
 
@@ -29,6 +32,8 @@ var _player: Node2D = null
 
 func _ready() -> void:
 	current_hp = max_hp
+	# Garante que está no grupo para a World conseguir encontrá-lo
+	add_to_group("enemies")
 	# Busca o player na cena pelo grupo "player"
 	_player = get_tree().get_first_node_in_group("player")
 
@@ -60,6 +65,7 @@ func _piscar() -> void:
 
 func _morrer() -> void:
 	print(enemy_name + " morreu!")
+	morreu.emit()
 	_dropar_essencia()
 	queue_free()
 

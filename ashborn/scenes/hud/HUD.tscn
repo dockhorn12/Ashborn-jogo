@@ -27,3 +27,17 @@ offset_top = 32.0
 offset_right = 212.0
 offset_bottom = 52.0
 text = "HP: 100 / 100"
+
+[node name="LabelEssencia" type="Label" parent="Control"]
+offset_left = 12.0
+offset_top = 54.0
+offset_right = 212.0
+offset_bottom = 74.0
+text = "Essência: 0"
+
+[node name="LabelInimigos" type="Label" parent="Control"]
+offset_left = 12.0
+offset_top = 76.0
+offset_right = 212.0
+offset_bottom = 96.0
+text = "Inimigos: 4"
