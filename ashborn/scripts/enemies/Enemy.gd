@@ -24,8 +24,8 @@ var current_hp: int
 @onready var contact_area: Area2D = $ContactArea
 
 # Cores para o efeito de piscar
-const COR_NORMAL := Color(0.85, 0.2, 0.2, 1)
-const COR_DANO   := Color(1.0, 1.0, 1.0, 1)
+const COR_NORMAL := Color(0.65, 0.05, 0.05, 1)
+const COR_DANO   := Color(1.0, 0.9, 0.2, 1)
 
 # Referência ao player (buscada no _ready)
 var _player: Node2D = null
